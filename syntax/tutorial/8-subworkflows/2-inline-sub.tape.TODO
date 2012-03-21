@@ -1,19 +1,21 @@
 # To define a subworkflow in the same file:
-[SUB:TM] < in1=x.txt > out1=$Y/out {
-  [X] < in=$TM/in1 > out {
+
+sub preproc( < in_text=x.txt > out_text=$out@tok) {
+  task filter_garbage( < in=$in_text > out) {
     cat < $in >$out
   }
-  [Y] < in=$X/out > out {
+  task tok( < in=$out@filter_garbage > out) {
     cat < $in > $out
   }
 }
 
+# Future work...
 # To define a "task function" in the same file
-[FUNC:FILTER] < in > out {
+func filter( < in > out) {
   cat < $in > $out
 }
 
 # Using that function or subworkflow later in the file:
 # (Require naming inputs and outputs again for clarity, but
    omit commands)
-[X]=FILTER < in=x.txt > out
+task my_filter = filter( < in=x.txt > out)
