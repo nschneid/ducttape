@@ -25,7 +25,7 @@ Basics: Running a single command
       ./hello-world/baseline/commands.sh, use:
    $ ducttape --dry-run --write-scripts basic.tape
 
-```
+```bash
 task hello_world {
   echo hi
   echo >&2 hello
@@ -34,7 +34,7 @@ task hello_world {
 
  The ducttape_structure global is a special directive to ducttape (ignore it for now)
 
-```
+```bash
 global {
   ducttape_structure=flat
 }
@@ -50,7 +50,7 @@ Basics: Writing output files
    ducttape before calling bash
  * Note that bash disallows variables containing .
 
-```
+```bash
 task hello_world_2 > x y_txt {
   echo writing files $x and $y_txt...
   echo hello > $x
@@ -64,7 +64,7 @@ task hello_world_2 > x y_txt {
  * types can still be automatically detected based on extension
  * it's easy to refer to outputs of programs with hardcoded output names (e.g. unix split)
 
-```
+```bash
 task named_output < x=/etc/passwd > named=x.gz {
   cat $x | gzip > $named
 }
@@ -80,7 +80,7 @@ Basics: Reading input files
  * This task takes 2 input files (a and b) and produces no output
  * Ducttape will set the environment variables in $a and $b before invoking bash
 
-```
+```bash
 task hello_world_3 < a=/etc/passwd b=/etc/hosts {
   echo "I will be reading files called $a and $b and doing nothing useful with them"
   cat $a>/dev/null
@@ -96,7 +96,7 @@ Basics: Running tasks with dependencies
 
  First a step we already know about...
 
-```
+```bash
 task first > x {
   for i in {1..10}; do
     echo $i >> $x
@@ -109,7 +109,7 @@ task first > x {
    it as a dependency using the "$" prefix
  TODO: $first/x should become $x@first
 
-```
+```bash
 task and_then < a=$x@first > x {
   cat < $a > $x
 }
@@ -127,7 +127,7 @@ Basics: Using parameters
  * Because we distinguish files from parameters, ducttape can check if input
    files exist before running length commands or submitting jobs to a scheduler
 
-```
+```bash
 task param_step < in=/etc/passwd > out :: N=5 {
   echo "$in has $(wc -l < $in) lines"
   echo "The parameter N is $N"
@@ -140,7 +140,7 @@ task param_step < in=/etc/passwd > out :: N=5 {
    they are references (like this step)
  * "no-dep" can start running in parallel with "param-step"
 
-```
+```bash
 task no_dep :: X=$N@param_step {
   #echo "X=$N" # a bug! this would be caught by ducttape's static analysis of bash
   echo "X=$X"
@@ -156,7 +156,7 @@ Basics: Anonymous configs
 
  TODO: More documentation
 
-```
+```bash
 task hello_anonymous_world :: who=$someone {
   echo hello $who
 }
@@ -165,7 +165,7 @@ task hello_anonymous_world :: who=$someone {
  an anonymous configuration block
  this creates no additional directory structure
 
-```
+```bash
 config {
   someone=world
 }
@@ -177,7 +177,7 @@ Basics: Named configs
 
  Named configs allow... TODO
 
-```
+```bash
 task hello_named_world :: who=$someone {
   echo hello $who
 }
@@ -186,7 +186,7 @@ task hello_named_world :: who=$someone {
  an named configuration block
  all tasks will be nested under an additional subdirectory called "World"
 
-```
+```bash
 config World {
   someone=world
 }
@@ -201,7 +201,7 @@ Basics: External config files
 
  TODO: Why are these useful?
 
-```
+```bash
 task hello_external_world :: who=$someone {
   echo hello $who
 }
@@ -216,7 +216,7 @@ Basics: Global variables
 
  TODO: Why are these useful?
 
-```
+```bash
 task hello_global_world :: who=$someone {
   echo hello $who
 }
@@ -226,7 +226,7 @@ task hello_global_world :: who=$someone {
  these are variables that should
  be shared among *all* configs
 
-```
+```bash
 global {
   someone=world
   ducttape_structure=flat
@@ -236,7 +236,7 @@ global {
 Basics: Shorthand variable references
 -------------------------------------
 
-```
+```bash
 task hello :: foo=@ {
      echo ${foo}
 }
@@ -263,7 +263,7 @@ Packages: Using package versioning
    the software you ran
  * in, out, and N are shown only to illustrate syntax
 
-```
+```bash
 task lunchtime_with_git : lunchpy {
   $lunchpy/lunch.py Indian Mexican Italian
 }
@@ -277,7 +277,7 @@ task lunchtime_with_git : lunchpy {
  Note: We don't actually need to compile anything for python code,
  but for the sake of example we'll make this program run a bit faster
 
-```
+```bash
 package lunchpy :: .versioner=git .repo="git://github.com/mjdenkowski/lunchpy.git" .ref=HEAD {
   python -m compileall .
 }
@@ -298,7 +298,7 @@ Packages: Understanding the git versioner
    the software you ran
  * in, out, and N are shown only to illustrate syntax
 
-```
+```bash
 task lunchtime : lunchpy {
   $lunchpy/lunch.py Indian Mexican Italian
 }
@@ -306,7 +306,7 @@ task lunchtime : lunchpy {
 
  * Build commands are only called when versioner indicates a new version
 
-```
+```bash
 package lunchpy :: .versioner=git .repo="git://github.com/mjdenkowski/lunchpy.git" .ref=HEAD {
   # We don't actually need to compile anything for python code,
   # but for the sake of example we'll make this program run a bit faster
@@ -329,7 +329,7 @@ package lunchpy :: .versioner=git .repo="git://github.com/mjdenkowski/lunchpy.gi
    which the tool was checked out. This version should *never* be a relative, mutable
    revision identifier such as HEAD or TRUNK.
 
-```
+```bash
 versioner git :: repo ref {
   action checkout > dir {
     git clone $repo $dir
@@ -390,7 +390,7 @@ HyperWorkflows: What are HyperWorkflows?
  Relative paths *as inputs* are resolved relative to this .tape file.
  (Remember, relative paths as outputs are resolved relative to the task's working directory)
 
-```
+```bash
 task has_branches < in=(WhichSize: smaller=small.txt bigger=big.txt) > out {
   cat < $in > $out
 }
@@ -403,7 +403,7 @@ task has_branches < in=(WhichSize: smaller=small.txt bigger=big.txt) > out {
    ./parent-has-branches/baseline/1/work
    ./parent-has-branches/bigger/1/work
 
-```
+```bash
 task parent_has_branches < in=$out@has_branches {
   wc -l $in
 }
@@ -422,7 +422,7 @@ HyperWorkflows: The default one off plan
 
  We start with a task much like the previous example
 
-```
+```bash
 task one_off_1 < in=(WhichSize: smaller=small.txt bigger=big.txt) > out {
   cat < $in > $out
 }
@@ -436,7 +436,7 @@ task one_off_1 < in=(WhichSize: smaller=small.txt bigger=big.txt) > out {
  the active branches by their branch point names and then removing
  any "baseline" branches
 
-```
+```bash
 task one_off_2 < in=$out@one_off_1 :: N=(N: one=1 two=2) {
   head -n $N < $in
 }
@@ -461,7 +461,7 @@ HyperWorkflows: Sequence Branch Points
  * The step receives the integer ID of this trial as a parameter
  * Ducttape handles the assignment of sequential ID numbers to whichTrial by the 1..10 construction
 
-```
+```bash
 task run_several_times > x :: trial=(WhichTrial: 1..10) {
   # Use bash's built-in random number generator
   echo $RANDOM > $x
@@ -473,7 +473,7 @@ HyperWorkflows: Custom realization plans
 
  We start with the same example from part 2
 
-```
+```bash
 task planned_1 < in=(whichSize: smaller=small.txt bigger=big.txt) > out {
   cat < $in > $out
 }
@@ -481,7 +481,7 @@ task planned_1 < in=(whichSize: smaller=small.txt bigger=big.txt) > out {
 
  And add a sequence to this step
 
-```
+```bash
 task planned_2 < in=$out@planned_1 :: N=(N: one=1 two=2) M=(M: 1..10) {
   head -n $N < $in \
     | head -n $M
@@ -492,7 +492,7 @@ task planned_2 < in=$out@planned_1 :: N=(N: one=1 two=2) M=(M: 1..10) {
  ducttape can be called with "ducttape -P Basics" to run cross products of branches by adding lines
  like the following to config files:
 
-```
+```bash
 plan Basics {
   # 4 experiments/realizations: the branches one and two with with all branches of whichSize
   # The * operator indicates a cross-product
@@ -523,7 +523,7 @@ HyperWorkflows: Branch Grating
  if we have a tokenizer that we'd like to run on the training, dev, and test set
  and then later using exactly one branch from that branch point
 
-```
+```bash
 task preproc < in=(DataSet: train=big.txt test=small.txt) > out {
   cat < $in > $out
 }
@@ -538,7 +538,7 @@ task tester < in=$out@preproc[DataSet:test] > hyps {
 HyperWorkflows: Nested Branch Points
 ------------------------------------
 
-```
+```bash
 task uses_nested < file=$ref_test :: N=$num_refs {
   echo "I will be reading file $file with $N refs"
   head -n $N $file
@@ -599,7 +599,7 @@ Submitters: Shell
  Using the shell submitter is equivalent
  to directly typing each tasks' commands on the command line
 
-```
+```bash
 task hello_shell {
   echo hello
 }
@@ -608,7 +608,7 @@ task hello_shell {
  $COMMANDS are the bash commands from some task
  In this case, the variable will contain "echo hello"
 
-```
+```bash
 submitter shell :: COMMANDS {
   action run > exit_code {
     eval $COMMANDS
@@ -619,7 +619,7 @@ submitter shell :: COMMANDS {
 Submitters: Sun Grid Engine (Simple)
 ------------------------------------
 
-```
+```bash
 task hello_sge :: .submitter=sge .walltime="00:01:00" .vmem=1g .q=all.q {
   echo hello
 }
@@ -629,7 +629,7 @@ task hello_sge :: .submitter=sge .walltime="00:01:00" .vmem=1g .q=all.q {
  COMMANDS: the bash commands from some task
  TASK, REALIZATION, CONFIGURATION: variables passed by ducttape
 
-```
+```bash
 submitter sge :: vmem walltime q
               :: COMMANDS
               :: TASK REALIZATION CONFIGURATION {
